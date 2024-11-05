@@ -1,0 +1,11 @@
+- name: "CAN0"
+  driver: "can"
+  device: "can0"
+  addr: 11
+  netmask: 0
+
+- name: "CAN2"
+  driver: "can"
+  device: "can2"
+  addr: 11
+  netmask: 0

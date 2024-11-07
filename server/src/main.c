@@ -104,14 +104,14 @@ int main(int argc, char * argv[])
         return EXIT_FAILURE;
     }
 
-    csp_print("Initialising CSP\n");
+    csp_print("[SERVER] Initialising CSP\n");
     csp_conf.dedup = CSP_DEDUP_ALL;
     csp_init();
     router_start();
 
     csp_yaml_init(args.csp_conf_file, NULL);
 
-    csp_print("Interfaces\r\n");
+    csp_print("[SERVER] Interfaces\r\n");
     csp_iflist_print();
 
     csp_socket_t sock = {0};
@@ -122,7 +122,7 @@ int main(int argc, char * argv[])
     signal(SIGTERM, sig_stop_handler);
 
     SERVER_STOP = 0;
-    csp_print("Starting server\n");
+    csp_print("[SERVER] Starting server\n");
     for(;;)
     {
         if (SERVER_STOP)
@@ -134,7 +134,7 @@ int main(int argc, char * argv[])
 
         packet_cnt = 0;
         dest_port = csp_conn_dport(conn);
-        csp_print("New connection on port: %d\n", dest_port);
+        csp_print("[SERVER] New connection on port: %d\n", dest_port);
         switch (dest_port)
         {
             case SERVER_PORT:
@@ -144,13 +144,18 @@ int main(int argc, char * argv[])
                 if (i_packet == NULL)
                     break;
 
+                if (0 == strcmp(i_packet->data, "SERVER_STOP")) {
+                    SERVER_STOP = 1;
+                    break;
+                }
+
                 o_packet = csp_buffer_get(0);
                 if (o_packet == NULL) {
-                    csp_print("--- Error: Failed to get CSP buffer\n");
+                    csp_print("[SERVER] --- Error: Failed to get CSP buffer\n");
                     return EXIT_FAILURE;
                 }
 
-                csp_print("New packet %d (on port %d): %s\n", packet_cnt, SERVER_PORT,
+                csp_print("[SERVER] New packet %d (on port %d): %s\n", packet_cnt, SERVER_PORT,
                     (char *) i_packet->data);
 
                 strcpy(o_packet->data, i_packet->data);
@@ -168,8 +173,8 @@ int main(int argc, char * argv[])
         }
 
         csp_close(conn);
-        csp_print("Connection closed\n");
-        csp_print("Packets received: %d\n", packet_cnt);
+        csp_print("[SERVER] Connection closed\n");
+        csp_print("[SERVER] Packets received: %d\n", packet_cnt);
     }
 
     return 0;

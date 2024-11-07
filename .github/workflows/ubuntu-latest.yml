@@ -38,4 +38,4 @@ jobs:
       run: ./scripts/vcan_net_conf.sh
 
     - name: Run test
-      run: ./scripts/test.sh
+      run: ./scripts/test.sh 100

@@ -10,4 +10,3 @@ target_link_libraries(${PROJECT_NAME} LINK_PUBLIC csp)
 target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/conf/client.yaml client.yaml COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/conf/rtable.txt rtable.txt COPYONLY)

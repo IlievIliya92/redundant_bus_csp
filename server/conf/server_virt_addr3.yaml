@@ -1,0 +1,11 @@
+- name: "CAN4"
+  driver: "can"
+  device: "vcan0"
+  addr: 3
+  netmask: 8
+
+- name: "CAN5"
+  driver: "can"
+  device: "vcan1"
+  addr: 3
+  netmask: 8

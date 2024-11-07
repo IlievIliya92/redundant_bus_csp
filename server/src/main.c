@@ -8,8 +8,9 @@
 #include <csp/csp_yaml.h>
 #include <csp/csp_debug.h>
 /******************************** LOCAL DEFINES *******************************/
-#define SERVER_PORT     10
 #define CSP_CONF_FILE_PATH_DFLT "./server.yaml"
+
+#define LOOPBACK_TEST_PORT     10
 
 /******************************* LOCAL TYPEDEFS *******************************/
 typedef struct _server_args_t
@@ -137,7 +138,7 @@ int main(int argc, char * argv[])
         csp_print("[SERVER] New connection on port: %d\n", dest_port);
         switch (dest_port)
         {
-            case SERVER_PORT:
+            case LOOPBACK_TEST_PORT:
             for (;;)
             {
                 i_packet = csp_read(conn, 1000);
@@ -155,7 +156,7 @@ int main(int argc, char * argv[])
                     return EXIT_FAILURE;
                 }
 
-                csp_print("[SERVER] New packet %d (on port %d): %s\n", packet_cnt, SERVER_PORT,
+                csp_print("[SERVER] New packet %d (on port %d): %s\n", packet_cnt, LOOPBACK_TEST_PORT,
                     (char *) i_packet->data);
 
                 strcpy(o_packet->data, i_packet->data);

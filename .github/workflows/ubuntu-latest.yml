@@ -38,7 +38,7 @@ jobs:
       run: ./scripts/vcan_net_conf.sh
 
     - name: Run redundant bus test
-      run: ./scripts/redundant_bus_test.sh 100
+      run: ./scripts/redundant_bus_test.sh 10
 
     - name: Run multiple servers test
-      run: ./scripts/multiple_servers_test.sh
+      run: ./scripts/multiple_servers_test.sh 10

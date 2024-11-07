@@ -10,3 +10,4 @@ target_link_libraries(${PROJECT_NAME} LINK_PUBLIC csp)
 target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/conf/server.yaml server.yaml COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/conf/server_virt.yaml server_virt.yaml COPYONLY)

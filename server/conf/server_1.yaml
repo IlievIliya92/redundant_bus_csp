@@ -1,6 +1,0 @@
-- name: "CAN3"
-  driver: "can"
-  device: "can3"
-  addr: 10
-  netmask: 0
-  default: true

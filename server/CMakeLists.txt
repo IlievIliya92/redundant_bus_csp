@@ -9,5 +9,4 @@ add_executable(
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC csp)
 target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/conf/server_0.yaml server_0.yaml COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/conf/server_1.yaml server_1.yaml COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/conf/server.yaml server.yaml COPYONLY)

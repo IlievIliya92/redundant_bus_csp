@@ -57,9 +57,9 @@ static struct argp argp = {options, parse_option, NULL, NULL, NULL, NULL, NULL};
 /******************************* LOCAL FUNCTIONS ******************************/
 static void usage(const char *exec_name)
 {
-    csp_print("%s -f [csp_configuration_file.yaml] -c [test_msgs_cnt]\n",
+    csp_print("[CLIENT] %s -f [csp_configuration_file.yaml] -c [test_msgs_cnt]\n",
         ( char *)exec_name);
-    csp_print("Run '%s --help' for more information\n", ( char *)exec_name);
+    csp_print("[CLIENT] Run '%s --help' for more information\n", ( char *)exec_name);
 }
 
 static void *router_task(void *param)
@@ -105,19 +105,19 @@ int main(int argc, char * argv[])
         return EXIT_FAILURE;
     }
 
-    csp_print("Initialising CSP\n");
+    csp_print("[CLIENT] Initialising CSP\n");
     csp_conf.dedup = CSP_DEDUP_ALL;
     csp_init();
     router_start();
 
     csp_yaml_init(args.csp_conf_file, NULL);
-    csp_print("Interfaces\n");
+    csp_print("[CLIENT] Interfaces\n");
     csp_iflist_print();
 
     conn = csp_connect(CSP_PRIO_NORM, SERVER_ADDRESS, SERVER_PORT,
         1000, CSP_O_NONE);
     if (conn == NULL) {
-        csp_print("--- Error: Connection failed (%d)!\n", SERVER_ADDRESS);
+        csp_print("[CLIENT] --- Error: Connection failed (%d)!\n", SERVER_ADDRESS);
         ret = EXIT_FAILURE;
         return ret;
     }
@@ -126,31 +126,43 @@ int main(int argc, char * argv[])
     {
 	    o_packet = csp_buffer_get(0);
 	    if (o_packet == NULL) {
-	        csp_print("--- Error: Failed to get CSP buffer\n");
+	        csp_print("[CLIENT] --- Error: Failed to get CSP buffer\n");
 	        ret = EXIT_FAILURE;
 	        return ret;
 	    }
 
         sprintf(o_packet->data, "Test message: %d", i);
         o_packet->length = strlen(o_packet->data) + 1;
-        csp_print("--> %d %s\n", i, o_packet->data);
+        csp_print("[CLIENT] --> %d %s\n", i, o_packet->data);
         csp_send(conn, o_packet);
         i_packet = csp_read(conn, 1000);
         if (i_packet != NULL)
         {
-            csp_print("<-- %d %s\n", i, i_packet->data);
+            csp_print("[CLIENT] <-- %d %s\n", i, i_packet->data);
             if (0 != strcmp(i_packet->data, o_packet->data))
-                csp_print("--- %d Error: Data missmatch! %s != %s\n", i,
+                csp_print("[CLIENT] --- %d Error: Data missmatch! %s != %s\n", i,
                      o_packet->data, i_packet->data);
             csp_buffer_free((csp_packet_t *)i_packet);
         }
         else
         {
-            csp_print("--- %d Error: Read failed!\n", i);
+            csp_print("[CLIENT] --- %d Error: Read failed!\n", i);
         }
 
 		csp_buffer_free((csp_packet_t *)o_packet);
     }
+
+    o_packet = csp_buffer_get(0);
+    if (o_packet == NULL) {
+        csp_print("[CLIENT] --- Error: Failed to get CSP buffer\n");
+        ret = EXIT_FAILURE;
+        return ret;
+    }
+
+    sprintf(o_packet->data, "SERVER_STOP");
+    o_packet->length = strlen(o_packet->data) + 1;
+    csp_send(conn, o_packet);
+    csp_buffer_free((csp_packet_t *)o_packet);
 
     csp_close(conn);
 

@@ -9,7 +9,7 @@
 #include <csp/csp_debug.h>
 /******************************** LOCAL DEFINES *******************************/
 #define SERVER_PORT     10
-#define CSP_CONF_FILE_PATH_DFLT "./server_0.yaml"
+#define CSP_CONF_FILE_PATH_DFLT "./server.yaml"
 
 /******************************* LOCAL TYPEDEFS *******************************/
 typedef struct _server_args_t
@@ -91,7 +91,10 @@ static int router_start(void)
 /********************************** MAIN **************************************/
 int main(int argc, char * argv[])
 {
-    csp_packet_t *packet = NULL;
+    int packet_cnt = 0;
+    int dest_port = 0;
+    csp_packet_t *i_packet = NULL;
+    csp_packet_t *o_packet = NULL;
     csp_conn_t *conn = NULL;
     server_args_t args = SERVER_DEFAULT_CFG;
 
@@ -102,7 +105,7 @@ int main(int argc, char * argv[])
     }
 
     csp_print("Initialising CSP\n");
-    csp_conf.dedup = CSP_DEDUP_INCOMING;
+    csp_conf.dedup = CSP_DEDUP_ALL;
     csp_init();
     router_start();
 
@@ -111,10 +114,7 @@ int main(int argc, char * argv[])
     csp_print("Interfaces\r\n");
     csp_iflist_print();
 
-    csp_socket_t sock = {
-        .opts = CSP_SO_RDPREQ,
-    };
-
+    csp_socket_t sock = {0};
     csp_bind(&sock, CSP_ANY);
     csp_listen(&sock, 10);
 
@@ -128,30 +128,48 @@ int main(int argc, char * argv[])
         if (SERVER_STOP)
             break;
 
-        /* Wait for a new connection, 10000 mS timeout */
-        if ((conn = csp_accept(&sock, 10000)) == NULL)
+        /* Wait for a new connection, 10 mS timeout */
+        if ((conn = csp_accept(&sock, 10)) == NULL)
             continue;
 
-        /* Read packets on connection, timout is 100 mS */
-        while ((packet = csp_read(conn, 50)) != NULL)
+        packet_cnt = 0;
+        dest_port = csp_conn_dport(conn);
+        csp_print("New connection on port: %d\n", dest_port);
+        switch (dest_port)
         {
-            switch (csp_conn_dport(conn))
-            {
             case SERVER_PORT:
-                /* Process packet here */
-                csp_print("New packet (on port %d): %s\n", SERVER_PORT, (char *) packet->data);
-                csp_send(conn, packet);
-                csp_buffer_free(packet);
-                break;
+            for (;;)
+            {
+                i_packet = csp_read(conn, 1000);
+                if (i_packet == NULL)
+                    break;
+
+                o_packet = csp_buffer_get(0);
+                if (o_packet == NULL) {
+                    csp_print("--- Error: Failed to get CSP buffer\n");
+                    return EXIT_FAILURE;
+                }
+
+                csp_print("New packet %d (on port %d): %s\n", packet_cnt, SERVER_PORT,
+                    (char *) i_packet->data);
+
+                strcpy(o_packet->data, i_packet->data);
+                o_packet->length = strlen(i_packet->data) + 1;
+                csp_send(conn, o_packet);
+
+                csp_buffer_free(o_packet);
+                csp_buffer_free(i_packet);
+                packet_cnt++;
+            }
+            break;
 
             default:
-                csp_service_handler(packet);
-                break;
-            }
+            break;
         }
 
-        /* Close current connection */
         csp_close(conn);
+        csp_print("Connection closed\n");
+        csp_print("Packets received: %d\n", packet_cnt);
     }
 
     return 0;

@@ -115,7 +115,9 @@ int main(int argc, char * argv[])
     csp_print("[SERVER] Interfaces\r\n");
     csp_iflist_print();
 
-    csp_socket_t sock = {0};
+    csp_socket_t sock = {
+        .opts = CSP_SO_RDPREQ,
+    };
     csp_bind(&sock, CSP_ANY);
     csp_listen(&sock, 10);
 

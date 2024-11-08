@@ -126,7 +126,7 @@ static int server_loopback_test(server_test_t *server_test)
     csp_packet_t *o_packet = NULL;
 
     conn = csp_connect(CSP_PRIO_NORM, server_test->address, LOOPBACK_TEST_PORT,
-        1000, CSP_O_NONE);
+        1000, CSP_O_RDP);
     if (conn == NULL) {
         csp_print("[CLIENT] --- Error: Connection failed (%d)!\n", server_test->address);
         return -1;
@@ -141,10 +141,12 @@ static int server_loopback_test(server_test_t *server_test)
             goto exit;
         }
 
+
         sprintf(o_packet->data, "Test message: %d", i);
         o_packet->length = strlen(o_packet->data) + 1;
         csp_print("[CLIENT] --> [SERVER %d]: %s\n", server_test->address, o_packet->data);
         csp_send(conn, o_packet);
+
         i_packet = csp_read(conn, 1000);
         if (i_packet != NULL)
         {

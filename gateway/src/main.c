@@ -13,20 +13,23 @@
 /******************************** LOCAL DEFINES *******************************/
 #define CSP_CONF_FILE_PATH_DFLT         "./gateway.yaml"
 #define CSP_MODE_DFLT                   "router"
+#define CSP_IO_VERBOSE_DFLT             0
 
 /******************************* LOCAL TYPEDEFS *******************************/
 typedef struct _client_args_t
 {
     char *csp_conf_file;
     char *mode;
+    int verbose;
 } client_args_t;
-#define GW_DEFAULT_CFG { CSP_CONF_FILE_PATH_DFLT, CSP_MODE_DFLT }
+#define GW_DEFAULT_CFG { CSP_CONF_FILE_PATH_DFLT, CSP_MODE_DFLT, CSP_IO_VERBOSE_DFLT}
 
 /********************************* LOCAL DATA *********************************/
 /* Input args table */
 static struct argp_option options[] = {
     {"csp_conf_file", 'f', "csp-conf-file.yaml", 0, "CSP configuration file", 0},
     {"mode", 'm', "mode", 0, "Operation mode: [router | bridge]", 0},
+    {"verbose", 'v', 0, 0, "Enable verbose", 0},
     { 0 }
 };
 
@@ -41,6 +44,9 @@ static error_t parse_option( int key, char *arg, struct argp_state *state )
             break;
         case 'm':
             arguments->mode = arg;
+            break;
+        case 'v':
+            arguments->verbose = 1;
             break;
         default:
             return ARGP_ERR_UNKNOWN;
@@ -90,8 +96,10 @@ int main(int argc, char * argv[])
         return EXIT_FAILURE;
     }
 
-    /* Uncomment to enable debug i/o packets print */
-    //csp_dbg_packet_print = 1;
+    if (args.verbose) {
+        csp_dbg_packet_print = 1;
+    }
+
     csp_print("[GATEWAY] Initialising CSP\n");
     csp_init();
 

@@ -14,6 +14,7 @@
 #define CSP_CONF_FILE_PATH_DFLT         "./client_virt.yaml"
 #define TEST_MESSAGES_N_DFLT            10
 #define SERVER_STOP_DFLT                0
+#define CSP_IO_VERBOSE_DFLT             0
 
 #define LOOPBACK_TEST_PORT              10
 /******************************* LOCAL TYPEDEFS *******************************/
@@ -25,9 +26,10 @@ typedef struct _client_args_t
     int server_stop;
     int *addresses;
     int addresses_n;
+    int verbose;
 } client_args_t;
 #define CLIENT_DEFAULT_CFG { CSP_CONF_FILE_PATH_DFLT, NULL, TEST_MESSAGES_N_DFLT,\
-    SERVER_STOP_DFLT, NULL, 0}
+    SERVER_STOP_DFLT, NULL, 0, CSP_IO_VERBOSE_DFLT}
 
 typedef struct _server_test_t
 {
@@ -43,6 +45,7 @@ static struct argp_option options[] = {
     {"count", 'c', "count", 0, "Test messages count", 0},
     {"server_stop", 's', "server-stop", 0, "Stop server after loopback test", 0},
     {"address", 'a', "adress", 0, "Address of the server", 0},
+    {"verbose", 'v', 0, 0, "Enable verbose", 0},
     { 0 }
 };
 
@@ -79,6 +82,9 @@ static error_t parse_option( int key, char *arg, struct argp_state *state )
             break;
         case 'a':
             parse_address(arg, state);
+            break;
+        case 'v':
+            arguments->verbose = 1;
             break;
         default:
             return ARGP_ERR_UNKNOWN;
@@ -188,8 +194,10 @@ int main(int argc, char * argv[])
         return EXIT_FAILURE;
     }
 
-    /* Uncomment to enable debug i/o packets print */
-    //csp_dbg_packet_print = 1;
+    if (args.verbose) {
+        csp_dbg_packet_print = 1;
+    }
+
     csp_print("[CLIENT] Initialising CSP\n");
     csp_conf.dedup = CSP_DEDUP_ALL;
     csp_init();

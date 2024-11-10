@@ -7,6 +7,8 @@
 #include <csp/csp.h>
 #include <csp/csp_yaml.h>
 #include <csp/csp_debug.h>
+
+#include "utils.h"
 /******************************** LOCAL DEFINES *******************************/
 #define CSP_CONF_FILE_PATH_DFLT "./server.yaml"
 
@@ -16,6 +18,7 @@
 typedef struct _server_args_t
 {
     char *csp_conf_file;
+    const char *rtable_file;
 } server_args_t;
 #define SERVER_DEFAULT_CFG { CSP_CONF_FILE_PATH_DFLT}
 
@@ -23,6 +26,7 @@ typedef struct _server_args_t
 /* Input args table */
 static struct argp_option options[] = {
     {"csp_conf_file", 'f', "csp-conf-file", 0, "CSP configuration file", 0},
+    {"rtable", 'r', "routing-table", 0, "Routing table", 0},
     { 0 }
 };
 static volatile sig_atomic_t SERVER_STOP;
@@ -35,6 +39,9 @@ static error_t parse_option( int key, char *arg, struct argp_state *state )
     switch (key) {
         case 'f':
             arguments->csp_conf_file = arg;
+            break;
+        case 'r':
+            arguments->rtable_file = arg;
             break;
         default:
             return ARGP_ERR_UNKNOWN;
@@ -59,45 +66,32 @@ void sig_stop_handler(int sig)
 /******************************* LOCAL FUNCTIONS ******************************/
 static void usage(const char *exec_name)
 {
-    csp_print("%s -f [csp_configuration_file.yaml]\n", ( char *)exec_name);
+    csp_print("%s -f [csp_configuration_file.yaml] -r [routing_table.txt]\n", ( char *)exec_name);
     csp_print("Run '%s --help' for more information\n", ( char *)exec_name);
 }
 
 static void *router_task(void *param)
 {
-    while (1)
+    for(;;)
+    {
         csp_route_work();
+    }
 
     return NULL;
-}
-
-static int router_start(void)
-{
-    pthread_attr_t attributes;
-    pthread_t handle;
-    int ret = CSP_ERR_NONE;
-
-    if (pthread_attr_init(&attributes) != 0)
-        return CSP_ERR_NOMEM;
-
-    /* no need to join with thread to free its resources */
-    pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
-
-    ret = pthread_create(&handle, &attributes, router_task, NULL);
-    pthread_attr_destroy(&attributes);
-
-    return ret;
 }
 
 /********************************** MAIN **************************************/
 int main(int argc, char * argv[])
 {
+    int ret = 0;
     int packet_cnt = 0;
     int dest_port = 0;
     csp_packet_t *i_packet = NULL;
     csp_packet_t *o_packet = NULL;
     csp_conn_t *conn = NULL;
+    char rtable[RTABLE_MAX_LEN];
     server_args_t args = SERVER_DEFAULT_CFG;
+
 
     if(0 != argp_parse(&argp, argc, argv, 0, 0, &args))
     {
@@ -105,11 +99,13 @@ int main(int argc, char * argv[])
         return EXIT_FAILURE;
     }
 
+    /* Uncomment to enable debug i/o packets print */
+    // csp_dbg_packet_print = 1;
     csp_print("[SERVER] Initialising CSP\n");
     csp_conf.dedup = CSP_DEDUP_ALL;
     csp_init();
-    router_start();
 
+    csp_print("[SERVER] Configuring interfaces from: %s\n", args.csp_conf_file)
     csp_yaml_init(args.csp_conf_file, NULL);
 
     csp_print("[SERVER] Interfaces\r\n");
@@ -121,8 +117,23 @@ int main(int argc, char * argv[])
     csp_bind(&sock, CSP_ANY);
     csp_listen(&sock, 10);
 
+    utils_thread_start(router_task);
+
     signal(SIGINT, sig_stop_handler);
     signal(SIGTERM, sig_stop_handler);
+
+    if (args.rtable_file != NULL)
+    {
+        csp_print("[SERVE] Loading routing table from: %s\n", args.rtable_file)
+        utils_rtable_get(args.rtable_file, rtable);
+        ret = csp_rtable_load(rtable);
+        if (ret < 1) {
+            csp_print("csp_rtable_load(%s) failed, error: %d\n", rtable, ret);
+            return EXIT_FAILURE;
+        }
+        csp_print("Route table\r\n");
+        csp_rtable_print();
+    }
 
     SERVER_STOP = 0;
     csp_print("[SERVER] Starting server\n");

@@ -1,0 +1,18 @@
+- name: "RF1"
+  driver: "kiss"
+  device: "/tmp/ttyUSB1"
+  baudrate: 115200
+  addr: 2
+  netmask: 12
+
+- name: "CAN0"
+  driver: "can"
+  device: "vcan0"
+  addr: 129
+  netmask: 8
+
+- name: "CAN1"
+  driver: "can"
+  device: "vcan1"
+  addr: 129
+  netmask: 8

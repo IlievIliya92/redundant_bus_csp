@@ -3,15 +3,15 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <pthread.h>
 
 #include <csp/csp.h>
 #include <csp/csp_yaml.h>
 #include <csp/csp_debug.h>
 #include <csp/arch/csp_time.h>
 
+#include "utils.h"
 /******************************** LOCAL DEFINES *******************************/
-#define CSP_CONF_FILE_PATH_DFLT         "./client.yaml"
+#define CSP_CONF_FILE_PATH_DFLT         "./client_virt.yaml"
 #define TEST_MESSAGES_N_DFLT            10
 #define SERVER_STOP_DFLT                0
 
@@ -20,12 +20,13 @@
 typedef struct _client_args_t
 {
     char *csp_conf_file;
+     const char *rtable_file;
     int count;
     int server_stop;
     int *addresses;
     int addresses_n;
 } client_args_t;
-#define CLIENT_DEFAULT_CFG { CSP_CONF_FILE_PATH_DFLT, TEST_MESSAGES_N_DFLT,\
+#define CLIENT_DEFAULT_CFG { CSP_CONF_FILE_PATH_DFLT, NULL, TEST_MESSAGES_N_DFLT,\
     SERVER_STOP_DFLT, NULL, 0}
 
 typedef struct _server_test_t
@@ -38,6 +39,7 @@ typedef struct _server_test_t
 /* Input args table */
 static struct argp_option options[] = {
     {"csp_conf_file", 'f', "csp-conf-file.yaml", 0, "CSP configuration file", 0},
+    {"rtable", 'r', "routing-table", 0, "Routing table", 0},
     {"count", 'c', "count", 0, "Test messages count", 0},
     {"server_stop", 's', "server-stop", 0, "Stop server after loopback test", 0},
     {"address", 'a', "adress", 0, "Address of the server", 0},
@@ -66,6 +68,9 @@ static error_t parse_option( int key, char *arg, struct argp_state *state )
         case 'f':
             arguments->csp_conf_file = arg;
             break;
+        case 'r':
+            arguments->rtable_file = arg;
+            break;
         case 'c':
             arguments->count = atoi(arg);
             break;
@@ -93,28 +98,12 @@ static void usage(const char *exec_name)
 
 static void *router_task(void *param)
 {
-    while (1)
+    for(;;)
+    {
         csp_route_work();
+    }
 
     return NULL;
-}
-
-static int router_start(void)
-{
-    pthread_attr_t attributes;
-    pthread_t handle;
-    int ret = CSP_ERR_NONE;
-
-    if (pthread_attr_init(&attributes) != 0)
-        return CSP_ERR_NOMEM;
-
-    /* no need to join with thread to free its resources */
-    pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
-
-    ret = pthread_create(&handle, &attributes, router_task, NULL);
-    pthread_attr_destroy(&attributes);
-
-    return ret;
 }
 
 static int server_loopback_test(server_test_t *server_test)
@@ -187,9 +176,11 @@ exit:
 /********************************** MAIN **************************************/
 int main(int argc, char * argv[])
 {
+    int ret = 0;
+    int i = 0;
+    char rtable[RTABLE_MAX_LEN];
     client_args_t args = CLIENT_DEFAULT_CFG;
     server_test_t server_test;
-    int i = 0;
 
     if(0 != argp_parse(&argp, argc, argv, 0, 0, &args))
     {
@@ -197,14 +188,31 @@ int main(int argc, char * argv[])
         return EXIT_FAILURE;
     }
 
+    /* Uncomment to enable debug i/o packets print */
+    //csp_dbg_packet_print = 1;
     csp_print("[CLIENT] Initialising CSP\n");
     csp_conf.dedup = CSP_DEDUP_ALL;
     csp_init();
-    router_start();
 
+    csp_print("[CLIENT] Configuring interfaces from: %s\n", args.csp_conf_file)
     csp_yaml_init(args.csp_conf_file, NULL);
     csp_print("[CLIENT] Interfaces\n");
     csp_iflist_print();
+
+    if (args.rtable_file != NULL)
+    {
+        csp_print("[CLIENT] Loading routing table from: %s\n", args.rtable_file)
+        utils_rtable_get(args.rtable_file, rtable);
+        ret = csp_rtable_load(rtable);
+        if (ret < 1) {
+            csp_print("csp_rtable_load(%s) failed, error: %d\n", rtable, ret);
+            return EXIT_FAILURE;
+        }
+        csp_print("Route table\r\n");
+        csp_rtable_print();
+    }
+
+    utils_thread_start(router_task);
 
     server_test.count = args.count;
     server_test.server_stop = args.server_stop;

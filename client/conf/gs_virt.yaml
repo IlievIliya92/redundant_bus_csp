@@ -1,0 +1,6 @@
+- name: "RF0"
+  driver: "kiss"
+  device: "/tmp/ttyUSB0"
+  baudrate: 115200
+  addr: 1
+  netmask: 12

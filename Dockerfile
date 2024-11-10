@@ -4,7 +4,7 @@ MAINTAINER "Iliya Iliev"
 
 # Install required packages
 RUN apt-get update && \
-     apt-get install --no-install-recommends --no-install-suggests -y sudo build-essential git cmake build-essential can-utils libyaml-dev pkg-config libsocketcan-dev libzmq3-dev net-tools iproute2 can-utils kmod
+     apt-get install --no-install-recommends --no-install-suggests -y sudo build-essential git cmake build-essential can-utils libyaml-dev pkg-config libsocketcan-dev libzmq3-dev net-tools iproute2 socat can-utils kmod
 
 RUN useradd -m docker_user && \
     echo 'docker_user:docker_user_pass' | chpasswd
@@ -18,7 +18,7 @@ RUN git config --global http.sslVerify false && \
      cd redundant_bus_csp && \
      git submodule init && \
      git submodule update && \
-     cmake -B ./build -DCMAKE_BUILD_TYPE=Release && \
+     cmake -B ./build -DCSP_USE_RTABLE=ON -DCSP_BUFFER_COUNT=50 -DCMAKE_BUILD_TYPE=Release && \
      cmake --build ./build --config Release
 
 USER docker_user

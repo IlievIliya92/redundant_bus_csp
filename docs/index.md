@@ -4,8 +4,10 @@ hide-toc: true
 
 
 ```{toctree}
-:caption: Modules
+:caption: Network Topologies
 :hidden:
 
+gw_setup
+bus_setup
 ```
 

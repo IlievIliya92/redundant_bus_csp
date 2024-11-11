@@ -33,9 +33,6 @@ jobs:
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-    
-    - name: Install
-      run: cmake --install ${{github.workspace}}/build
 
     - name: Setup vcan ifaces
       run: ./scripts/virt_net_conf.sh

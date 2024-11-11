@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(gateway VERSION 1.0.0 DESCRIPTION "CSP gateway")
+project(gateway_csp VERSION 1.0.0 DESCRIPTION "CSP gateway")
 
 add_executable(
     ${PROJECT_NAME}

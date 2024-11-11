@@ -19,7 +19,8 @@ RUN git config --global http.sslVerify false && \
      git submodule init && \
      git submodule update && \
      cmake -B ./build -DCSP_USE_RTABLE=ON -DCSP_BUFFER_COUNT=50 -DCMAKE_BUILD_TYPE=Release && \
-     cmake --build ./build --config Release
+     cmake --build ./build --config Release && \
+     cmake --install ./build
 
 USER docker_user
 SHELL ["/bin/bash", "-c"]

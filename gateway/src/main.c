@@ -101,6 +101,7 @@ int main(int argc, char * argv[])
     }
 
     csp_print("[GATEWAY] Initialising CSP\n");
+    csp_conf.dedup = CSP_DEDUP_ALL;
     csp_init();
 
     csp_yaml_init(args.csp_conf_file, NULL);

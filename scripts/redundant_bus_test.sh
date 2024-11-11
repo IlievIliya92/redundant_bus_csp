@@ -1,11 +1,11 @@
 #!/bin/bash
 
 SERVER_BUILD_DIR=./build/server/
-SERVER_BIN=server
+SERVER_BIN=server_csp
 SERVER_CONF_FILE=module_0_virt.yaml
 
 CLIENT_BUILD_DIR=./build/client/
-CLIENT_BIN=client
+CLIENT_BIN=client_csp
 CLIENT_CONF_FILE=client_virt.yaml
 
 run_test() {

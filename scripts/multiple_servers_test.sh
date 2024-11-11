@@ -3,10 +3,10 @@
 set -e
 
 SERVER_BUILD_DIR=./build/server/
-SERVER_BIN=server
+SERVER_BIN=server_csp
 
 CLIENT_BUILD_DIR=./build/client/
-CLIENT_BIN=client
+CLIENT_BIN=client_csp
 CLIENT_CONF_FILE=client_virt.yaml
 
 ${SERVER_BUILD_DIR}${SERVER_BIN} -f ${SERVER_BUILD_DIR}module_0_virt.yaml &

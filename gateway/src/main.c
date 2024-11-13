@@ -111,7 +111,7 @@ int main(int argc, char * argv[])
     csp_print("[GATEWAY] %s mode\n", args.mode);
     if (0 == strcmp(args.mode, "router"))
     {
-        utils_thread_start(router_task);
+        utils_thread_start(router_task, NULL);
     }
     else if (0 == strcmp(args.mode, "bridge"))
     {
@@ -122,7 +122,7 @@ int main(int argc, char * argv[])
         csp_bridge_set_interfaces(gw, can0);
         csp_print("[GATEWAY] Bridging %s to %s\n", gw->name, can1->name);
         csp_bridge_set_interfaces(gw, can1);
-        utils_thread_start(bridge_task);
+        utils_thread_start(bridge_task, NULL);
     }
     else
     {

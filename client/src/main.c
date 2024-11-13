@@ -13,10 +13,10 @@
 /******************************** LOCAL DEFINES *******************************/
 #define CSP_CONF_FILE_PATH_DFLT         "./client_virt.yaml"
 #define TEST_MESSAGES_N_DFLT            10
+#define SERVER_PORT_DFLT                10
 #define SERVER_STOP_DFLT                0
 #define CSP_IO_VERBOSE_DFLT             0
 
-#define LOOPBACK_TEST_PORT              10
 /******************************* LOCAL TYPEDEFS *******************************/
 typedef struct _client_args_t
 {
@@ -26,14 +26,16 @@ typedef struct _client_args_t
     int server_stop;
     int *addresses;
     int addresses_n;
+    int port;
     int verbose;
 } client_args_t;
 #define CLIENT_DEFAULT_CFG { CSP_CONF_FILE_PATH_DFLT, NULL, TEST_MESSAGES_N_DFLT,\
-    SERVER_STOP_DFLT, NULL, 0, CSP_IO_VERBOSE_DFLT}
+    SERVER_STOP_DFLT, NULL, 0, SERVER_PORT_DFLT, CSP_IO_VERBOSE_DFLT}
 
 typedef struct _server_test_t
 {
     int address;
+    int port;
     int count;
     int server_stop;
 } server_test_t;
@@ -45,6 +47,7 @@ static struct argp_option options[] = {
     {"count", 'c', "count", 0, "Test messages count", 0},
     {"server_stop", 's', "server-stop", 0, "Stop server after loopback test", 0},
     {"address", 'a', "adress", 0, "Address of the server", 0},
+    {"port", 'p', "port", 0, "Application port", 0},
     {"verbose", 'v', 0, 0, "Enable verbose", 0},
     { 0 }
 };
@@ -83,6 +86,9 @@ static error_t parse_option( int key, char *arg, struct argp_state *state )
         case 'a':
             parse_address(arg, state);
             break;
+        case 'p':
+            arguments->port = atoi(arg);
+            break;
         case 'v':
             arguments->verbose = 1;
             break;
@@ -116,11 +122,13 @@ static int server_loopback_test(server_test_t *server_test)
 {
     int i = 0;
     int ret = 0;
+    int dest_port = 0;
     csp_conn_t *conn = NULL;
     csp_packet_t *i_packet = NULL;
     csp_packet_t *o_packet = NULL;
 
-    conn = csp_connect(CSP_PRIO_NORM, server_test->address, LOOPBACK_TEST_PORT,
+    csp_print("Connecting on port: %d\n", server_test->port);
+    conn = csp_connect(CSP_PRIO_NORM, server_test->address, server_test->port,
         1000, CSP_O_RDP);
     if (conn == NULL) {
         csp_print("[CLIENT] --- Error: Connection failed (%d)!\n", server_test->address);
@@ -136,13 +144,19 @@ static int server_loopback_test(server_test_t *server_test)
             goto exit;
         }
 
-
-        sprintf(o_packet->data, "Test message: %d", i);
+        sprintf(o_packet->data, "%d Test message: %d", server_test->port, i);
         o_packet->length = strlen(o_packet->data) + 1;
         csp_print("[CLIENT] --> [SERVER %d]: %s\n", server_test->address, o_packet->data);
         csp_send(conn, o_packet);
 
         i_packet = csp_read(conn, 1000);
+        dest_port = csp_conn_sport(conn);
+        if (dest_port != server_test->port)
+        {
+            csp_print("Dest_port: %d\n", dest_port);
+            continue;
+        }
+
         if (i_packet != NULL)
         {
             csp_print("[CLIENT] <-- [SERVER %d]: %s\n", server_test->address, i_packet->data);
@@ -220,10 +234,11 @@ int main(int argc, char * argv[])
         csp_rtable_print();
     }
 
-    utils_thread_start(router_task);
+    utils_thread_start(router_task, NULL);
 
     server_test.count = args.count;
     server_test.server_stop = args.server_stop;
+    server_test.port = args.port;
     for(i = 0; i < args.addresses_n; i ++) {
         server_test.address = args.addresses[i];
         csp_print("Loopback test to server on address: %d\n", server_test.address);

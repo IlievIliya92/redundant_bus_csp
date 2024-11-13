@@ -1,4 +1,4 @@
-# Ground Station - Gateway - Redundant CAN bus topology
+# Ground Station - Satelite comm
 
 The setup illustrates the usage of a redundant CAN bus network with multiple modules, a gateway, and a ground station. The network is designed to ensure reliable communication by using two separate CAN buses (CAN Bus 0 and CAN Bus 1), providing redundancy in case one of the buses fails.
 

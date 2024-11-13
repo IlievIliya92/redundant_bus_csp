@@ -6,7 +6,7 @@
 /******************************** LOCAL DEFINES *******************************/
 
 /**************************** INTERFACE FUNCTIONS *****************************/
-int utils_thread_start(task_hanlder_t task_handler)
+int utils_thread_start(task_hanlder_t task_handler, void *args)
 {
     pthread_attr_t attributes;
     pthread_t handle;
@@ -18,7 +18,7 @@ int utils_thread_start(task_hanlder_t task_handler)
     /* no need to join with thread to free its resources */
     pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
 
-    ret = pthread_create(&handle, &attributes, task_handler, NULL);
+    ret = pthread_create(&handle, &attributes, task_handler, args);
     pthread_attr_destroy(&attributes);
 
     return ret;

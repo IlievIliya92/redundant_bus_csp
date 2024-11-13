@@ -20,7 +20,7 @@ jobs:
       if: ${{ runner.os == 'Linux' }}
       run: |
         sudo apt-get update
-        sudo apt-get install libzmq3-dev libsocketcan-dev socat iproute2
+        sudo apt-get install libzmq3-dev libsocketcan-dev socat iproute2 libboost-program-options-dev
         sudo apt-get install linux-modules-extra-$(uname -r)
 
     - name: Submodules Init

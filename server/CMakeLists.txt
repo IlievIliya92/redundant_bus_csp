@@ -12,8 +12,11 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/conf/module_2_rtable_virt.txt module_
 
 add_executable(
     ${PROJECT_NAME}
-    "src/main.c"
+    "src/main.cpp"
 )
+target_include_directories(${PROJECT_NAME} PRIVATE "src/")
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC utils)
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC boost_program_options)
 
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC utils)
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC csp)

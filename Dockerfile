@@ -4,7 +4,7 @@ MAINTAINER "Iliya Iliev"
 
 # Install required packages
 RUN apt-get update && \
-     apt-get install --no-install-recommends --no-install-suggests -y sudo build-essential git cmake build-essential can-utils libyaml-dev pkg-config libsocketcan-dev libzmq3-dev net-tools iproute2 socat can-utils kmod
+     apt-get install --no-install-recommends --no-install-suggests -y sudo build-essential git cmake build-essential can-utils libyaml-dev pkg-config libsocketcan-dev libzmq3-dev net-tools iproute2 socat can-utils kmod libboost-program-options-dev
 
 RUN useradd -m docker_user && \
     echo 'docker_user:docker_user_pass' | chpasswd

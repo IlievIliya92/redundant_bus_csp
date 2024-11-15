@@ -1,6 +1,4 @@
 /******************************** INCLUDE FILES *******************************/
-// #include <stdlib.h>
-// #include <pthread.h>
 #include <fstream>
 #include <csignal>
 #include <thread>

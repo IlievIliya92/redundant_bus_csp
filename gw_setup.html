@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ground Station - Satelite comm &mdash; Redundant CSP CAN bus</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.5ea377869091fd0449014c60fc090103.min.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+        <script src="_static/design-tabs.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Direct Bus Communication" href="bus_setup.html" />
+    <link rel="prev" title="Redundant CSP CAN bus" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: rgba(52,49,49,1) 100%;" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Redundant CSP CAN bus
+          </a>
+              <div class="version">
+                main
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Network Topologies</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Ground Station - Satelite comm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bus_setup.html">Direct Bus Communication</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: rgba(52,49,49,1) 100%;" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Redundant CSP CAN bus</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Ground Station - Satelite comm</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ground-station-satelite-comm">
+<h1>Ground Station - Satelite comm<a class="headerlink" href="#ground-station-satelite-comm" title="Permalink to this heading"></a></h1>
+<p>The setup illustrates the usage of a redundant CAN bus network with multiple modules, a gateway, and a ground station. The network is designed to ensure reliable communication by using two separate CAN buses (CAN Bus 0 and CAN Bus 1), providing redundancy in case one of the buses fails.</p>
+<link rel="stylesheet" type="text/css" href="./_static/css/custom.css" media="screen" />
+<div  class='img-container'>
+<img src="./_static/gs_gw_bus.png" class='img-source'>
+</div>
+<br>
+<br>
+<section id="components-and-network-topology">
+<h2>Components and Network Topology:<a class="headerlink" href="#components-and-network-topology" title="Permalink to this heading"></a></h2>
+<section id="ground-station">
+<h3>Ground Station:<a class="headerlink" href="#ground-station" title="Permalink to this heading"></a></h3>
+<p>The ground station communicates with the network via RF0.</p>
+<ul class="simple">
+<li><p>Address: 1</p></li>
+<li><p>Netmask: 12</p></li>
+<li><p>Routing: 0/0 RF0 (indicating that all traffic from the ground station is routed through RF0).</p></li>
+</ul>
+</section>
+<section id="gateway">
+<h3>Gateway:<a class="headerlink" href="#gateway" title="Permalink to this heading"></a></h3>
+<p>The gateway acts as an intermediary between the ground station and the CAN bus network.
+It has two interfaces:</p>
+<p><strong>RF1</strong>: Communicates with the ground station.</p>
+<ul class="simple">
+<li><p>Address: 2</p></li>
+<li><p>Netmask: 12</p></li>
+</ul>
+<p><strong>CAN0 and CAN1:</strong> These are the gateway’s interfaces to the CAN buses.</p>
+<ul class="simple">
+<li><p>Address (on both CAN0 and CAN1): 129</p></li>
+<li><p>Netmask: 8</p></li>
+</ul>
+</section>
+<section id="can-buses">
+<h3>CAN Buses:<a class="headerlink" href="#can-buses" title="Permalink to this heading"></a></h3>
+<p>There are two CAN buses in this network:</p>
+<ul class="simple">
+<li><p>CAN Bus 0 (yellow lines)</p></li>
+<li><p>CAN Bus 1 (green lines)</p></li>
+</ul>
+<p>These buses provide redundant communication paths between the gateway and the modules.</p>
+</section>
+<section id="modules-module-0-module-1-module-2">
+<h3>Modules (Module 0, Module 1, Module 2):<a class="headerlink" href="#modules-module-0-module-1-module-2" title="Permalink to this heading"></a></h3>
+<p>Each module has two CAN interfaces connected to both CAN Bus 0 and CAN Bus 1 for redundancy.
+Each module has its own address and routing configuration.</p>
+<p><strong>Module 0:</strong> Connected to both CAN Bus 0 and CAN Bus 1 via CAN2 and CAN3, respectively.</p>
+<ul class="simple">
+<li><p>Address on CAN2/CAN3: 130</p></li>
+<li><p>Netmask: 8</p></li>
+<li><p>Routing: Traffic is routed through both buses (1/12).</p></li>
+</ul>
+<p><strong>Module 1:</strong> Connected to both buses via CAN3 (Bus 0) and CAN4 (Bus 1).</p>
+<ul class="simple">
+<li><p>Address on CAN3/CAN4: 131</p></li>
+<li><p>Netmask: 8</p></li>
+<li><p>Routing: Similar to Module 0, traffic is routed through both buses (1/12).</p></li>
+</ul>
+<p><strong>Module 2:</strong> Connected via CAN5 (Bus 0) and CAN6 (Bus 1).</p>
+<ul class="simple">
+<li><p>Address on CAN5/CAN6: 132</p></li>
+<li><p>Netmask: 8</p></li>
+<li><p>Routing: Traffic is routed through both buses (1/12).</p></li>
+</ul>
+<p>The network uses two separate CAN buses to provide redundancy. If one bus fails, communication can continue over the other bus.
+Each module has two interfaces connected to different buses, ensuring that they can communicate even if one of the buses is down. The gateway connects the ground station to the redundant CAN bus system, allowing external communication with the modules.</p>
+</section>
+</section>
+<section id="bus-redundancy-and-deduplication">
+<h2>Bus redundancy and deduplication<a class="headerlink" href="#bus-redundancy-and-deduplication" title="Permalink to this heading"></a></h2>
+<section id="bus-redundancy">
+<h3>Bus redundancy<a class="headerlink" href="#bus-redundancy" title="Permalink to this heading"></a></h3>
+<p>The redundancy ensures that if one of the CAN buses fails (due to a physical fault or other issues), the communication can continue uninterrupted via the other bus. When a packet is sent from the Ground Station to a specific module (e.g., Module 0), the packet is forwarded by the Gateway over both CAN Bus 0 and CAN Bus 1 simultaneously. This means that:</p>
+<ul class="simple">
+<li><p>The packet travels over both buses, reaching the destination through two separate paths.</p></li>
+<li><p>In this case, Module 0 receives the packet on both its interfaces (CAN2 and CAN3), ensuring that at least one copy of the packet will be delivered even if one of the buses fails.</p></li>
+</ul>
+</section>
+<section id="packet-deduplication">
+<h3>Packet Deduplication<a class="headerlink" href="#packet-deduplication" title="Permalink to this heading"></a></h3>
+<p>Since the packet is transmitted over both CAN buses, it will arrive at the destination node twice—once from each bus. To avoid processing the same packet multiple times, a packet deduplication mechanism is employed at the receiving node (e.g., Module 0). Here’s how deduplication works:</p>
+<ul class="simple">
+<li><p>When Module 0 receives the first copy of the packet from CAN Bus 0 via CAN2 it calculates its crc32 unique identifier
+and processes it.</p></li>
+<li><p>When it receives the second copy of the same packet from CAN Bus 1 via CAN3, it recognizes that this packet has already been processed (based on its crc32 checksum) and discards it.</p></li>
+</ul>
+<div  class='img-container'>
+<img src="./_static/packet_send.gif" class='img-source'>
+</div>
+<br>
+<br>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Redundant CSP CAN bus" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="bus_setup.html" class="btn btn-neutral float-right" title="Direct Bus Communication" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Iliya Iliev.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
